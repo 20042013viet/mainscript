@@ -1,163 +1,224 @@
--- [[ GROW A GARDEN 2 - MENU FAKE TIỀN & ROBUX TROLL V14 ]] --
+-- [[ ROBLOX UNIVERSAL - SCRIPT CÀI GIÁ TÙY Ý CỰC CHUẨN V22 ]] --
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
-local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 local CoreGui = game:GetService("CoreGui")
+local MarketplaceService = game:GetService("MarketplaceService")
 
--- Xóa UI cũ nếu có trùng
-if CoreGui:FindFirstChild("TrollMenuGui") then
-    CoreGui.TrollMenuGui:Destroy()
-end
+local fakeRobuxBalance = 4305000
+local customTargetPrice = 5000 -- Giá mặc định ban đầu là 5k, bồ có thể sửa trên UI
+local isTrollRevealed = false
 
--- =======================================================
--- TẠO GIAO DIỆN (UI DESIGN)
--- =======================================================
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "TrollMenuGui"
-ScreenGui.Parent = CoreGui
-ScreenGui.ResetOnSpawn = false
+print("--- [UNIVERSAL TROLL V22] BẢNG ĐIỀU KHIỂN BÍ MẬT ĐÃ SẴN SÀNG ---")
 
--- Khung Menu Chính
-local MainFrame = Instance.new("Frame")
-MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 260, 0, 220)
-MainFrame.Position = UDim2.new(0.5, -130, 0.4, -110)
-MainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
-MainFrame.BorderSizePixel = 0
-MainFrame.Active = true
-MainFrame.Draggable = true -- Bồ có thể lấy chuột kéo menu đi khắp màn hình
-MainFrame.Parent = ScreenGui
-
-local UICorner = Instance.new("UICorner", MainFrame)
-UICorner.CornerRadius = UDim.new(0, 10)
-
--- Tiêu đề Menu
-local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, 0, 0, 35)
-Title.Text = "👑 MENU PHÚ ÔNG TROLL 👑"
-Title.TextColor3 = Color3.fromRGB(255, 215, 0)
-Title.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
-Title.TextSize = 16
-Title.Font = Enum.Font.SourceSansBold
-Title.Parent = MainFrame
-local TitleCorner = Instance.new("UICorner", Title)
-
--- Ô nhập số tiền (TextBox Money)
-local MoneyInput = Instance.new("TextBox")
-MoneyInput.Size = UDim2.new(0, 220, 0, 35)
-MoneyInput.Position = UDim2.new(0, 20, 0, 50)
-MoneyInput.PlaceholderText = "Nhập số tiền (VD: 65,000,000)..."
-MoneyInput.Text = "65,000,000"
-MoneyInput.BackgroundColor3 = Color3.fromRGB(50, 50, 55)
-MoneyInput.TextColor3 = Color3.fromRGB(255, 255, 255)
-MoneyInput.TextSize = 14
-MoneyInput.Font = Enum.Font.SourceSans
-MoneyInput.Parent = MainFrame
-Instance.new("UICorner", MoneyInput)
-
--- Ô nhập số Robux (TextBox Robux)
-local RobuxInput = Instance.new("TextBox")
-RobuxInput.Size = UDim2.new(0, 220, 0, 35)
-RobuxInput.Position = UDim2.new(0, 20, 0, 100)
-RobuxInput.PlaceholderText = "Nhập số Robux (VD: 100,000)..."
-RobuxInput.Text = "100,000"
-RobuxInput.BackgroundColor3 = Color3.fromRGB(50, 50, 55)
-RobuxInput.TextColor3 = Color3.fromRGB(255, 255, 255)
-RobuxInput.TextSize = 14
-RobuxInput.Font = Enum.Font.SourceSans
-RobuxInput.Parent = MainFrame
-Instance.new("UICorner", RobuxInput)
-
--- Nút Kích Hoạt (Button Apply)
-local ApplyBtn = Instance.new("TextButton")
-ApplyBtn.Size = UDim2.new(0, 220, 0, 40)
-ApplyBtn.Position = UDim2.new(0, 20, 0, 155)
-ApplyBtn.Text = "KÍCH HOẠT PHÚ ÔNG"
-ApplyBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 90)
-ApplyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-ApplyBtn.TextSize = 15
-ApplyBtn.Font = Enum.Font.SourceSansBold
-ApplyBtn.Parent = MainFrame
-Instance.new("UICorner", ApplyBtn)
-
--- Nút Ẩn/Hiện Menu (Toggle Button)
-local ToggleBtn = Instance.new("TextButton")
-ToggleBtn.Size = UDim2.new(0, 80, 0, 30)
-ToggleBtn.Position = UDim2.new(0, 10, 0, 10)
-ToggleBtn.Text = "Ẩn Menu"
-ToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-ToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-ToggleBtn.TextSize = 13
-ToggleBtn.Font = Enum.Font.SourceSansBold
-ToggleBtn.Parent = ScreenGui
-Instance.new("UICorner", ToggleBtn)
-
--- Logic đóng/mở giao diện khi bấm nút Ẩn Menu
-ToggleBtn.MouseButton1Click:Connect(function()
-    MainFrame.Visible = not MainFrame.Visible
-    if MainFrame.Visible then
-        ToggleBtn.Text = "Ẩn Menu"
-        ToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-    else
-        ToggleBtn.Text = "Hiện Menu"
-        ToggleBtn.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
-    end
-end)
+-- Dọn dẹp UI cũ nếu trùng
+if CoreGui:FindFirstChild("FakeRobloxPromptGui") then CoreGui.FakeRobloxPromptGui:Destroy() end
+if CoreGui:FindFirstChild("RevealTrollGui") then CoreGui.RevealTrollGui:Destroy() end
+if CoreGui:FindFirstChild("TrollControlPanelGui") then CoreGui.TrollControlPanelGui:Destroy() end
 
 -- =======================================================
--- LOGIC XOÁ MÙ / FAKE GIÁ TRỊ THEO INPUT
+-- MẠCH ÉP ĐÈ SỐ DƯ ROBUX LIÊN TỤC
 -- =======================================================
-local targetMoney = "65,000,000¢"
-local targetRobux = "100,000"
-local isTrollActive = false
-
-ApplyBtn.MouseButton1Click:Connect(function()
-    targetMoney = MoneyInput.Text .. "¢"
-    targetRobux = RobuxInput.Text
-    isTrollActive = true
-    print("[Troll] Đã áp dụng số fake mới! Tiền: " .. targetMoney .. " | Robux: " .. targetRobux)
+local function updateRobuxDisplay()
+    local formatted = tostring(fakeRobuxBalance):reverse():gsub("(%d%d%d)", "%1,"):reverse():gsub("^,", "")
+    if isTrollRevealed then formatted = "0" end
     
-    -- Đổi màu hiệu ứng nút bấm phát cho chất
-    ApplyBtn.Text = "ĐÃ KÍCH HOẠT THÀNH CÔNG!"
-    ApplyBtn.BackgroundColor3 = Color3.fromRGB(150, 120, 0)
-    task.wait(1)
-    ApplyBtn.Text = "CẬP NHẬT SỐ KHÁC"
-    ApplyBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 90)
-end)
-
--- Luồng chạy ngầm đè giao diện game liên tục
-task.spawn(function()
-    while task.wait(0.2) do
-        if isTrollActive then
-            pcall(function()
-                -- Đè tiền game
-                for _, v in pairs(PlayerGui:GetDescendants()) do
-                    if v:IsA("TextLabel") then
-                        if v.Text:find("¢") or v.Text:find("M¢") or v.Name:lower():find("money") or v.Name:lower():find("cash") then
-                            v.Text = targetMoney
-                        end
-                    end
-                end
-                
-                -- Đè Robux hệ thống
-                local topbar = CoreGui:FindFirstChild("TopBarApp")
-                if topbar then
-                    for _, v in pairs(topbar:GetDescendants()) do
-                        if v:IsA("TextLabel") and (v.Name:lower():find("robux") or v.Text:find("R$")) then
-                            v.Text = targetRobux
-                        end
-                    end
-                end
-                
-                -- Đè Robux trong game
-                for _, v in pairs(PlayerGui:GetDescendants()) do
-                    if v:IsA("TextLabel") then
-                        if v.Name:lower():find("robux") or v.Text:find("R$") then
-                            v.Text = targetRobux
-                        end
-                    end
-                end
-            end)
+    local topbar = CoreGui:FindFirstChild("TopBarApp")
+    if topbar then
+        for _, v in pairs(topbar:GetDescendants()) do
+            if v:IsA("TextLabel") and (v.Name:lower():find("robux") or v.Text:find("R$")) then
+                v.Text = formatted
+            end
         end
     end
+end
+task.spawn(function() while task.wait(0.05) do updateRobuxDisplay() end end)
+
+-- =======================================================
+-- TẠO BẢNG ĐIỀU KHIỂN BÍ MẬT (CHỈ CHỦ SCRIPT NHÌN THẤY)
+-- =======================================================
+local ControlGui = Instance.new("ScreenGui", CoreGui)
+ControlGui.Name = "TrollControlPanelGui"
+
+local ControlFrame = Instance.new("Frame", ControlGui)
+ControlFrame.Size = UDim2.new(0, 200, 0, 90)
+ControlFrame.Position = UDim2.new(0, 10, 0.5, -45) -- Nằm nép bên cạnh trái màn hình
+ControlFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+ControlFrame.BackgroundTransparency = 0.2
+Instance.new("UICorner", ControlFrame).CornerRadius = UDim.new(0, 8)
+
+local ControlTitle = Instance.new("TextLabel", ControlFrame)
+ControlTitle.Size = UDim2.new(1, 0, 0, 30)
+ControlTitle.Text = "Nhập giá muốn trừ (Robux):"
+ControlTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+ControlTitle.TextSize = 12
+ControlTitle.Font = Enum.Font.SourceSansBold
+ControlTitle.BackgroundTransparency = 1
+
+local PriceInput = Instance.new("TextBox", ControlFrame)
+PriceInput.Size = UDim2.new(1, -20, 0, 35)
+PriceInput.Position = UDim2.new(0, 10, 0, 40)
+PriceInput.Text = "5000" -- Số mặc định hiện sẵn
+PriceInput.TextColor3 = Color3.fromRGB(0, 255, 120)
+PriceInput.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+PriceInput.TextSize = 18
+PriceInput.Font = Enum.Font.SourceSansBold
+Instance.new("UICorner", PriceInput).CornerRadius = UDim.new(0, 6)
+
+-- Lắng nghe khi bồ thay đổi số trong ô nhập
+PriceInput.FocusLost:Connect(function()
+    local val = tonumber(PriceInput.Text)
+    if val then
+        customTargetPrice = val
+        print("[TROLL V22] Đã cài giá trừ tiền tiếp theo thành: " .. val .. " Robux")
+    else
+        PriceInput.Text = tostring(customTargetPrice)
+    end
 end)
+
+-- =======================================================
+-- TẠO UI CHUẨN ĐÉT THEO ẢNH IMAGE_A166A2.PNG
+-- =======================================================
+local ScreenGui = Instance.new("ScreenGui", CoreGui)
+ScreenGui.Name = "FakeRobloxPromptGui"
+ScreenGui.DisplayOrder = 999999
+
+local BackgroundDim = Instance.new("Frame", ScreenGui)
+BackgroundDim.Size = UDim2.new(1, 0, 1, 0)
+BackgroundDim.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+BackgroundDim.BackgroundTransparency = 0.5
+BackgroundDim.Visible = false
+
+local MainPrompt = Instance.new("Frame", BackgroundDim)
+MainPrompt.Size = UDim2.new(0, 440, 0, 260)
+MainPrompt.Position = UDim2.new(0.5, -220, 0.5, -130)
+MainPrompt.BackgroundColor3 = Color3.fromRGB(25, 27, 31)
+MainPrompt.BorderSizePixel = 0
+Instance.new("UICorner", MainPrompt).CornerRadius = UDim.new(0, 16)
+
+local Title = Instance.new("TextLabel", MainPrompt)
+Title.Size = UDim2.new(1, -40, 0, 40)
+Title.Position = UDim2.new(0, 24, 0, 15)
+Title.Text = "Purchase completed"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 20
+Title.Font = Enum.Font.SourceSansBold
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.BackgroundTransparency = 1
+
+local CloseX = Instance.new("TextButton", MainPrompt)
+CloseX.Size = UDim2.new(0, 30, 0, 30)
+CloseX.Position = UDim2.new(1, -45, 0, 15)
+CloseX.Text = "✕"
+CloseX.TextColor3 = Color3.fromRGB(200, 200, 200)
+CloseX.TextSize = 18
+CloseX.Font = Enum.Font.SourceSansBold
+CloseX.BackgroundTransparency = 1
+
+local CheckIcon = Instance.new("ImageLabel", MainPrompt)
+CheckIcon.Size = UDim2.new(0, 65, 0, 65)
+CheckIcon.Position = UDim2.new(0.5, -32, 0, 70)
+CheckIcon.Image = "rbxassetid://12543323041"
+CheckIcon.BackgroundTransparency = 1
+
+local ContentText = Instance.new("TextLabel", MainPrompt)
+ContentText.Size = UDim2.new(1, -40, 0, 40)
+ContentText.Position = UDim2.new(0, 20, 0, 145)
+ContentText.Text = "You have successfully bought the item."
+ContentText.TextColor3 = Color3.fromRGB(200, 200, 200)
+ContentText.TextSize = 13
+ContentText.Font = Enum.Font.SourceSans
+ContentText.TextWrapped = true
+ContentText.BackgroundTransparency = 1
+
+local OkBtn = Instance.new("TextButton", MainPrompt)
+OkBtn.Size = UDim2.new(1, -48, 0, 45)
+OkBtn.Position = UDim2.new(0, 24, 1, -65)
+OkBtn.Text = "OK"
+OkBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+OkBtn.BackgroundColor3 = Color3.fromRGB(58, 102, 247)
+OkBtn.Font = Enum.Font.SourceSansBold
+OkBtn.TextSize = 16
+Instance.new("UICorner", OkBtn).CornerRadius = UDim.new(0, 10)
+
+-- =======================================================
+-- TẠO UI BÓC PHỐT "BẠN ĐÃ BỊ TROLL"
+-- =======================================================
+local RevealGui = Instance.new("ScreenGui", CoreGui)
+RevealGui.Name = "RevealTrollGui"
+RevealGui.DisplayOrder = 1000000
+
+local RevealFrame = Instance.new("Frame", RevealGui)
+RevealFrame.Size = UDim2.new(0, 450, 0, 200)
+RevealFrame.Position = UDim2.new(0.5, -225, 0.35, -100)
+RevealFrame.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+RevealFrame.Visible = false
+Instance.new("UICorner", RevealFrame).CornerRadius = UDim.new(0, 15)
+
+local TrollText = Instance.new("TextLabel", RevealFrame)
+TrollText.Size = UDim2.new(1, 0, 0, 130)
+TrollText.Text = "🤣 BẠN ĐÃ BỊ TROLL! 🤣\nGÀ THẾ MÀ CŨNG TIN!"
+TrollText.TextColor3 = Color3.fromRGB(255, 255, 255)
+TrollText.TextSize = 28
+TrollText.Font = Enum.Font.SourceSansBold
+TrollText.BackgroundTransparency = 1
+
+local CloseTrollBtn = Instance.new("TextButton", RevealFrame)
+CloseTrollBtn.Size = UDim2.new(0, 160, 0, 40)
+CloseTrollBtn.Position = UDim2.new(0.5, -80, 0, 140)
+CloseTrollBtn.Text = "Tắt Quê Đê 🤫"
+CloseTrollBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+CloseTrollBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseTrollBtn.Font = Enum.Font.SourceSansBold
+CloseTrollBtn.TextSize = 16
+Instance.new("UICorner", CloseTrollBtn)
+
+-- =======================================================
+-- LOGIC KÍCH HOẠT BẢNG MUA (CHẶN HỆ THỐNG GỐC)
+-- =======================================================
+local function hookPurchase(assetId, assetType)
+    if isTrollRevealed then return end
+    
+    local nameOfItem = "Limited Item"
+    pcall(function()
+        local info = MarketplaceService:GetProductInfo(assetId, assetType)
+        if info and info.Name then nameOfItem = info.Name end
+    end)
+    
+    ContentText.Text = "You have successfully bought " .. nameOfItem .. "."
+    BackgroundDim.Visible = true
+end
+
+MarketplaceService.PromptGamePassPurchaseRequested:Connect(function(player, gamePassId)
+    if player == LocalPlayer then hookPurchase(gamePassId, Enum.InfoType.GamePass) end
+end)
+
+MarketplaceService.PromptProductPurchaseRequested:Connect(function(player, productId)
+    if player == LocalPlayer then hookPurchase(productId, Enum.InfoType.Product) end
+end)
+
+-- =======================================================
+-- NÚT OK: TRỪ CHÍNH XÁC SỐ TIỀN BỒ VỪA TỰ TAY NHẬP
+-- =======================================================
+OkBtn.MouseButton1Click:Connect(function()
+    BackgroundDim.Visible = false
+    
+    -- TRỪ ĐÚNG CON SỐ MÀ BỒ ĐÃ CÀI ĐẶT TRÊN BẢNG ĐIỀU KHIỂN BÊN TRÁI
+    fakeRobuxBalance = fakeRobuxBalance - customTargetPrice
+    updateRobuxDisplay()
+    
+    -- ĐỢI ĐÚNG 10 GIÂY RỒI QUAY XE
+    task.spawn(function()
+        task.wait(10)
+        isTrollRevealed = true
+        RevealFrame.Visible = true
+        
+        local cam = workspace.CurrentCamera
+        for i = 1, 10 do
+            cam.CFrame = cam.CFrame * CFrame.new(math.random(-1,1)/5, math.random(-1,1)/5, 0)
+            task.wait(0.02)
+        end
+    end)
+end)
+
+CloseX.MouseButton1Click:Connect(function() BackgroundDim.Visible = false end)
+CloseTrollBtn.MouseButton1Click:Connect(function() RevealFrame.Visible = false end)
