@@ -1,0 +1,101 @@
+-- [[ GROW A GARDEN 2 - AUTO JOIN & HOP SERVER TÌM SUPER/MYTHICAL PET V8 ]] --
+print("--- [AUTOMATIC HOPPER V8] TỰ ĐỘNG QUÉT VÀ ĐỔI SERVER LIÊN TỤC ---")
+
+local HttpService = game:GetService("HttpService")
+local TeleportService = game:GetService("TeleportService")
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local LocalPlayer = Players.LocalPlayer
+
+-- Danh sách từ khóa Pet tối thượng bồ cần săn
+local targetPets = {
+    "unicorn", "raccoon", "ice serpent", "black dragon", "golden dragonfly", -- Mythical
+    "super", "divine", "secret" -- Super/Đột biến lang thang
+}
+
+-- Hàm tự động tìm và Join vào một Server mới hoàn toàn
+local function autoJoinNewServer()
+    print("[Hopper] Đang kết nối tới API Roblox để tìm danh sách server...")
+    local success, result = pcall(function()
+        -- Lấy danh sách 100 server công khai đang chạy của game
+        local url = "https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"
+        local servers = HttpService:JSONDecode(game:HttpGet(url))
+        local validServers = {}
+        
+        for _, server in pairs(servers.data) do
+            -- Chỉ chọn server còn chỗ và không phải server hiện tại bồ đang đứng
+            if server.playing < server.maxPlayers and server.id ~= game.JobId then
+                table.insert(validServers, server.id)
+            end
+        end
+        
+        if #validServers > 0 then
+            -- Chọn ngẫu nhiên một server trong danh sách để tránh bị lặp lại server cũ
+            local randomServerId = validServers[math.random(1, #validServers)]
+            print("[Hopper] Đã tìm thấy server ngon! Đang tiến hành chuyển vùng...")
+            TeleportService:TeleportToPlaceInstance(game.PlaceId, randomServerId, LocalPlayer)
+        else
+            print("[Hopper] Không tìm thấy server nào trống, tiến hành nhảy mặc định...")
+            TeleportService:Teleport(game.PlaceId, LocalPlayer)
+        end
+    end)
+    
+    if not success then
+        print("[Hopper Lỗi] Không thể lấy danh sách server. Thử lại sau 3 giây...")
+        task.wait(3)
+        TeleportService:Teleport(game.PlaceId, LocalPlayer)
+    end
+end
+
+-- Tự động xếp hàng lệnh để khi vừa sang server mới là script chạy tiếp ngay
+if queue_on_teleport then
+    queue_on_teleport([[print("Đang tải dữ liệu ở server mới... Appended code executed.")]])
+end
+
+-- ==========================================
+-- MẠCH QUÉT HOÀN TOÀN TỰ ĐỘNG KHI VÀO GAME
+-- ==========================================
+task.wait(2.5) -- Chờ 2.5 giây để game load hết các shop và thực thể ra map
+
+local foundTarget = false
+local detectedName = ""
+
+-- Quét một vòng toàn bộ thế giới xem có mục tiêu không
+for _, obj in pairs(Workspace:GetDescendants()) do
+    if obj:IsA("ProximityPrompt") then
+        local textToScan = (obj.Parent.Name .. " " .. obj.ObjectText .. " " .. obj.ActionText):lower()
+        
+        for _, pet in pairs(targetPets) do
+            if textToScan:find(pet) then
+                foundTarget = true
+                detectedName = obj.Parent.Name:upper()
+                break
+            end
+        end
+    end
+    if foundTarget then break end
+end
+
+-- Xử lý kết quả quét tự động
+if foundTarget then
+    print("====================================================")
+    print("[🔥 THÀNH CÔNG] ĐÃ TÌM THẤY SERVER HOÀN HẢO CÓ: " .. detectedName)
+    print("[STATUS] DỪNG KÍCH HOẠT HOPPER. BỒ VÀO TREO SCRIPT FARM ĐƯỢC RỒI!")
+    print("====================================================")
+    
+    -- Tạo một thông báo trên màn hình cho bồ dễ nhìn thấy khi treo máy
+    local ScreenGui = Instance.new("ScreenGui", game:GetService("CoreGui"))
+    local Notification = Instance.new("TextLabel", ScreenGui)
+    Notification.Size = UDim2.new(0, 400, 0, 50)
+    Notification.Position = UDim2.new(0.5, -200, 0.1, 0)
+    Notification.Text = "🔥 ĐÃ TÌM THẤY SERVER CÓ: " .. detectedName
+    Notification.BackgroundColor3 = Color3.fromRGB(0, 180, 100)
+    Notification.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Notification.TextSize = 20
+    Notification.Font = Enum.Font.SourceSansBold
+else
+    print("[Thông báo] Server này không có Pet Super hay Mythical nào cả.")
+    print("[Hopper] Tự động kích hoạt lệnh rời và tìm server mới sau 2 giây...")
+    task.wait(2)
+    autoJoinNewServer()
+end
