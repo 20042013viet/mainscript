@@ -1,0 +1,93 @@
+-- [[ GROW A GARDEN 2 - SCRIPT TEST SERVER HOPPER MYTHICAL PET ]] --
+print("--- [TEST HOPPER] ĐANG KHỞI CHẠY BẢN QUÉT SERVER TÌM PET MYTHICAL ---")
+
+local HttpService = game:GetService("HttpService")
+local TeleportService = game:GetService("TeleportService")
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local LocalPlayer = Players.LocalPlayer
+
+-- Danh sách các Pet cấp cao (Mythical/Divine) bồ muốn kiểm tra stock trong server
+local mythicalPets = {
+    "unicorn", 
+    "raccoon", 
+    "ice serpent", 
+    "black dragon", 
+    "golden dragonfly"
+}
+
+-- Hàm thực hiện chuyển đổi Server an toàn không lo bị trùng server cũ
+local function serverHop()
+    print("[Hopper] Không tìm thấy Pet ngon. Đang quét tìm Server mới...")
+    local success, result = pcall(function()
+        -- Lấy danh sách các server công khai đang hoạt động của game này
+        local servers = HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"))
+        local targetServer = nil
+        
+        for _, server in pairs(servers.data) do
+            -- Chọn các server còn chỗ trống và không phải server hiện tại
+            if server.playing < server.maxPlayers and server.id ~= game.JobId then
+                targetServer = server.id
+                break
+            end
+        end
+        
+        if targetServer then
+            print("[Hopper] Đang kết nối tới Server ID: " .. targetServer)
+            TeleportService:TeleportToPlaceInstance(game.PlaceId, targetServer, LocalPlayer)
+        else
+            -- Nếu danh sách lỗi, dùng cơ chế nhảy ngẫu nhiên mặc định
+            TeleportService:Teleport(game.PlaceId, LocalPlayer)
+        end
+    end)
+    
+    if not success then
+        print("[Hopper Lỗi] Không hop được server, thử lại sau 3 giây...")
+        task.wait(3)
+        TeleportService:Teleport(game.PlaceId, LocalPlayer)
+    end
+end
+
+-- ==========================================
+-- MẠCH QUÉT DỮ LIỆU KHI VỪA VÀO SERVER
+-- ==========================================
+task.wait(2) -- Chờ game load các mô hình shop ra map
+
+local foundMythical = false
+local detectedPetName = ""
+
+-- Quét toàn bộ Workspace để tìm ProximityPrompt của các chuồng/shop bán pet
+for _, obj in pairs(Workspace:GetDescendants()) do
+    if obj:IsA("ProximityPrompt") then
+        local textToScan = (obj.Parent.Name .. " " .. obj.ObjectText .. " " .. obj.ActionText):lower()
+        
+        -- Đối chiếu với danh sách Pet Mythical
+        for _, pet in pairs(mythicalPets) do
+            if textToScan:find(pet) then
+                foundMythical = true
+                detectedPetName = pet:upper()
+                break
+            end
+        end
+    end
+    if foundMythical then break end
+end
+
+-- Biện pháp an toàn phòng trường hợp game check lỗi dịch chuyển quá nhanh
+if syn and syn.queue_on_teleport then
+    syn.queue_on_teleport([[print("Tiếp tục quét ở server mới...")]])
+elseif queue_on_teleport then
+    queue_on_teleport([[print("Tiếp tục quét ở server mới...")]])
+end
+
+-- Xử lý kết quả kiểm tra
+if foundMythical then
+    print("=========================================")
+    print("[TEST THÀNH CÔNG] ĐÃ TÌM THẤY SERVER CÓ PET MYTHICAL: " .. detectedPetName)
+    print("[STATUS] DỪNG SERVER HOP. BỒ CÓ THỂ BẬT SCRIPT FARM CHÍNH Ở ĐÂY!")
+    print("=========================================")
+else
+    print("[Thông báo] Server này toàn Pet cùi (Common/Rare). Chuẩn bị nhảy sau 3 giây...")
+    task.wait(3)
+    serverHop()
+end
