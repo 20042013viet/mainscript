@@ -1,0 +1,36 @@
+-- [[ LUỒNG QUÉT SIÊU TỐC: CHẶN ĐẦU MYTHICAL & SĂN LÙNG SUPER PET ]] --
+local targetPets = {
+    -- Mythical (Shop cố định)
+    "unicorn", "raccoon", "ice serpent", "black dragon", "golden dragonfly",
+    -- Super (Spawn đột biến/lang thang)
+    "super", "divine", "secret"
+}
+
+task.spawn(function()
+    while _G.KaitunGod do
+        task.wait(0.3) -- Quét liên tục mỗi 0.3 giây để không hụt Pet Super lang thang
+        for _, obj in pairs(Workspace:GetDescendants()) do
+            if obj:IsA("ProximityPrompt") then
+                local nameText = (obj.Parent.Name .. " " .. obj.ObjectText .. " " .. obj.ActionText):lower()
+                
+                for _, petType in pairs(targetPets) do
+                    if nameText:find(petType) then
+                        -- Phát hiện mục tiêu (Dù là shop Mythical hay Super Pet vừa xuất hiện)
+                        print("[🔥 PHÁT HIỆN SIÊU THÚ] Tìm thấy: " .. obj.Parent.Name:upper() .. " | Tiến hành tiếp cận!")
+                        
+                        -- Bay tới vị trí Pet/Shop ngay lập tức
+                        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                            LocalPlayer.Character.HumanoidRootPart.CFrame = obj.Parent:GetPivot() * CFrame.new(0, 3, 0)
+                            task.wait(0.1)
+                            -- Kích hoạt hành động mua/bắt
+                            obj:InputHoldBegin()
+                            task.wait(obj.HoldDuration)
+                            obj:InputHoldEnd()
+                        end
+                        break
+                    end
+                end
+            end
+        end
+    end
+end)
