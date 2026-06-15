@@ -1,0 +1,59 @@
+-- [[ GROW A GARDEN 2 - SIÊU RADAR QUÉT TÊN MODEL V10 ]] --
+_G.KaitunGod = true
+
+local Workspace = game:GetService("Workspace")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+print("--- [RADAR V10] KHỞI CHẠY CÔNG NGHỆ QUÉT THẲNG TÊN MODEL (BAO TEST PET CÓ SẴN) ---")
+
+-- Danh sách từ khóa tên Pet bồ muốn định vị
+local targetKeywords = {
+    "unicorn", "raccoon", "ice serpent", "black dragon", "golden dragonfly", -- Mythical
+    "super", "divine", "secret" -- Super / Đột biến
+}
+
+-- Hàm kiểm tra xem chuỗi có chứa từ khóa Pet không
+local function isTargetPet(name)
+    local lowerName = name:lower()
+    for _, keyword in pairs(targetKeywords) do
+        if lowerName:find(keyword) then
+            return true, keyword:upper()
+        end
+    end
+    return false, nil
+end
+
+-- Mạch quét diện rộng toàn map (Check cả pet đang đi theo người chơi)
+task.spawn(function()
+    while _G.KaitunGod do
+        task.wait(0.5) -- Quét mỗi 0.5 giây
+        
+        for _, obj in pairs(Workspace:GetDescendants()) do
+            -- Quét tất cả các Model hoặc MeshPart có tên chứa từ khóa (Không cần ProximityPrompt)
+            if obj:IsA("Model") or obj:IsA("BasePart") then
+                local isTarget, petType = isTargetPet(obj.Name)
+                
+                if isTarget then
+                    -- Bỏ qua nếu đó là pet đang đeo trên người của chính acc đang chạy script này
+                    if not obj:IsDescendantOf(LocalPlayer.Character) then
+                        print("====================================================")
+                        print("[🔥 RADAR V10 PHÁT HIỆN]: Tìm thấy Model chứa từ khóa [" .. petType .. "]")
+                        print("[Tên chính xác trong Game]: " || obj.Name)
+                        print("[Vị trí hiện tại]: " || tostring(obj:GetPivot().Position))
+                        print("====================================================")
+                        
+                        -- Nếu muốn nhân vật tự động dịch chuyển thẳng tới đứng đè lên con pet đó để test:
+                        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                            -- Mở đoạn code dưới đây nếu muốn tự bay tới:
+                            -- LocalPlayer.Character.HumanoidRootPart.CFrame = obj:GetPivot() * CFrame.new(0, 2, 0)
+                        end
+                        
+                        task.wait(2) -- Tạm dừng thông báo 2 giây để tránh spam kín màn hình F9
+                        break
+                    end
+                end
+            end
+        end
+    end
+end)
