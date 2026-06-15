@@ -1,0 +1,163 @@
+-- [[ GROW A GARDEN 2 - MENU FAKE TIỀN & ROBUX TROLL V14 ]] --
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+local CoreGui = game:GetService("CoreGui")
+
+-- Xóa UI cũ nếu có trùng
+if CoreGui:FindFirstChild("TrollMenuGui") then
+    CoreGui.TrollMenuGui:Destroy()
+end
+
+-- =======================================================
+-- TẠO GIAO DIỆN (UI DESIGN)
+-- =======================================================
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "TrollMenuGui"
+ScreenGui.Parent = CoreGui
+ScreenGui.ResetOnSpawn = false
+
+-- Khung Menu Chính
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Size = UDim2.new(0, 260, 0, 220)
+MainFrame.Position = UDim2.new(0.5, -130, 0.4, -110)
+MainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
+MainFrame.BorderSizePixel = 0
+MainFrame.Active = true
+MainFrame.Draggable = true -- Bồ có thể lấy chuột kéo menu đi khắp màn hình
+MainFrame.Parent = ScreenGui
+
+local UICorner = Instance.new("UICorner", MainFrame)
+UICorner.CornerRadius = UDim.new(0, 10)
+
+-- Tiêu đề Menu
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, 0, 0, 35)
+Title.Text = "👑 MENU PHÚ ÔNG TROLL 👑"
+Title.TextColor3 = Color3.fromRGB(255, 215, 0)
+Title.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
+Title.TextSize = 16
+Title.Font = Enum.Font.SourceSansBold
+Title.Parent = MainFrame
+local TitleCorner = Instance.new("UICorner", Title)
+
+-- Ô nhập số tiền (TextBox Money)
+local MoneyInput = Instance.new("TextBox")
+MoneyInput.Size = UDim2.new(0, 220, 0, 35)
+MoneyInput.Position = UDim2.new(0, 20, 0, 50)
+MoneyInput.PlaceholderText = "Nhập số tiền (VD: 65,000,000)..."
+MoneyInput.Text = "65,000,000"
+MoneyInput.BackgroundColor3 = Color3.fromRGB(50, 50, 55)
+MoneyInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+MoneyInput.TextSize = 14
+MoneyInput.Font = Enum.Font.SourceSans
+MoneyInput.Parent = MainFrame
+Instance.new("UICorner", MoneyInput)
+
+-- Ô nhập số Robux (TextBox Robux)
+local RobuxInput = Instance.new("TextBox")
+RobuxInput.Size = UDim2.new(0, 220, 0, 35)
+RobuxInput.Position = UDim2.new(0, 20, 0, 100)
+RobuxInput.PlaceholderText = "Nhập số Robux (VD: 100,000)..."
+RobuxInput.Text = "100,000"
+RobuxInput.BackgroundColor3 = Color3.fromRGB(50, 50, 55)
+RobuxInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+RobuxInput.TextSize = 14
+RobuxInput.Font = Enum.Font.SourceSans
+RobuxInput.Parent = MainFrame
+Instance.new("UICorner", RobuxInput)
+
+-- Nút Kích Hoạt (Button Apply)
+local ApplyBtn = Instance.new("TextButton")
+ApplyBtn.Size = UDim2.new(0, 220, 0, 40)
+ApplyBtn.Position = UDim2.new(0, 20, 0, 155)
+ApplyBtn.Text = "KÍCH HOẠT PHÚ ÔNG"
+ApplyBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 90)
+ApplyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ApplyBtn.TextSize = 15
+ApplyBtn.Font = Enum.Font.SourceSansBold
+ApplyBtn.Parent = MainFrame
+Instance.new("UICorner", ApplyBtn)
+
+-- Nút Ẩn/Hiện Menu (Toggle Button)
+local ToggleBtn = Instance.new("TextButton")
+ToggleBtn.Size = UDim2.new(0, 80, 0, 30)
+ToggleBtn.Position = UDim2.new(0, 10, 0, 10)
+ToggleBtn.Text = "Ẩn Menu"
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+ToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleBtn.TextSize = 13
+ToggleBtn.Font = Enum.Font.SourceSansBold
+ToggleBtn.Parent = ScreenGui
+Instance.new("UICorner", ToggleBtn)
+
+-- Logic đóng/mở giao diện khi bấm nút Ẩn Menu
+ToggleBtn.MouseButton1Click:Connect(function()
+    MainFrame.Visible = not MainFrame.Visible
+    if MainFrame.Visible then
+        ToggleBtn.Text = "Ẩn Menu"
+        ToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+    else
+        ToggleBtn.Text = "Hiện Menu"
+        ToggleBtn.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
+    end
+end)
+
+-- =======================================================
+-- LOGIC XOÁ MÙ / FAKE GIÁ TRỊ THEO INPUT
+-- =======================================================
+local targetMoney = "65,000,000¢"
+local targetRobux = "100,000"
+local isTrollActive = false
+
+ApplyBtn.MouseButton1Click:Connect(function()
+    targetMoney = MoneyInput.Text .. "¢"
+    targetRobux = RobuxInput.Text
+    isTrollActive = true
+    print("[Troll] Đã áp dụng số fake mới! Tiền: " .. targetMoney .. " | Robux: " .. targetRobux)
+    
+    -- Đổi màu hiệu ứng nút bấm phát cho chất
+    ApplyBtn.Text = "ĐÃ KÍCH HOẠT THÀNH CÔNG!"
+    ApplyBtn.BackgroundColor3 = Color3.fromRGB(150, 120, 0)
+    task.wait(1)
+    ApplyBtn.Text = "CẬP NHẬT SỐ KHÁC"
+    ApplyBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 90)
+end)
+
+-- Luồng chạy ngầm đè giao diện game liên tục
+task.spawn(function()
+    while task.wait(0.2) do
+        if isTrollActive then
+            pcall(function()
+                -- Đè tiền game
+                for _, v in pairs(PlayerGui:GetDescendants()) do
+                    if v:IsA("TextLabel") then
+                        if v.Text:find("¢") or v.Text:find("M¢") or v.Name:lower():find("money") or v.Name:lower():find("cash") then
+                            v.Text = targetMoney
+                        end
+                    end
+                end
+                
+                -- Đè Robux hệ thống
+                local topbar = CoreGui:FindFirstChild("TopBarApp")
+                if topbar then
+                    for _, v in pairs(topbar:GetDescendants()) do
+                        if v:IsA("TextLabel") and (v.Name:lower():find("robux") or v.Text:find("R$")) then
+                            v.Text = targetRobux
+                        end
+                    end
+                end
+                
+                -- Đè Robux trong game
+                for _, v in pairs(PlayerGui:GetDescendants()) do
+                    if v:IsA("TextLabel") then
+                        if v.Name:lower():find("robux") or v.Text:find("R$") then
+                            v.Text = targetRobux
+                        end
+                    end
+                end
+            end)
+        end
+    end
+end)
